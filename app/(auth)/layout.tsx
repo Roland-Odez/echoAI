@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "echoAI - Login/Signup",
@@ -12,7 +13,11 @@ export default function RootLayout({
 }>) {
   return (
     <div>
-        <main>
+        <main className="relative h-screen w-full">
+          <div className="absolute size-full">
+            <Image src='/images/bg-img.png' alt='background' fill className='size-full' />
+          </div>
+          // 1:37:33
             {children}
         </main>
     </div>
