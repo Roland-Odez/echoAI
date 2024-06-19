@@ -3,6 +3,7 @@ import MobileNav from "@/components/MobileNav";
 import Rightsidebar from "@/components/Rightsidebar";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "echoAI - Home page",
@@ -31,7 +32,7 @@ export default function RootLayout({
                   <MobileNav />
                 </div>
                 <div className="flex flex-col md:pd-14">
-                  Toaster (notificatipn)
+                  <Toaster />
                   {children}
                 </div>
               </div>
