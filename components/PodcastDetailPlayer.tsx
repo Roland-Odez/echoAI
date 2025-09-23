@@ -50,8 +50,8 @@ const PodcastDetailPlayer = ({
   const handlePlay = () => {
     setAudio({
       title: podcastTitle,
-      audioUrl,
-      imageUrl,
+      audioUrl: audioUrl ? audioUrl : '',
+      imageUrl: imageUrl ? imageUrl: '',
       author,
       podcastId,
     });

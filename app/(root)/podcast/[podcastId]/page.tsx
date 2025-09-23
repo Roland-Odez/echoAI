@@ -37,11 +37,13 @@ const PodcastDetails = ({params: {podcastId}}: {params: {podcastId: Id<'podcasts
         </figure>
       </header>
         
-      <PodcastDetailPlayer
+      {(podcast.imageStorageId && podcast.audioStorageId) && <PodcastDetailPlayer
         isOwner={isOwner}
         {...podcast}
+         imageStorageId={podcast.imageStorageId}
+         audioStorageId={podcast.audioStorageId}
         podcastId={podcast._id}
-      />
+      />}
 
       <p className="text-white-2 text-16 pb-8 pt-[45px] font-medium max-md:text-center">{podcast?.podcastDescription}</p>
 
