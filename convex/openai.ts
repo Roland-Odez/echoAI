@@ -43,4 +43,3 @@ export const generateThumbnailAction = action({
     return buffer
   }
 })
-

@@ -4,6 +4,7 @@ import Rightsidebar from "@/components/Rightsidebar";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Toaster } from "@/components/ui/toaster"
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata: Metadata = {
   title: "echoAI - Home page",
@@ -39,6 +40,8 @@ export default function RootLayout({
             </section>
             <Rightsidebar />
         </main>
+
+        <PodcastPlayer />
     </div>
   );
 }
