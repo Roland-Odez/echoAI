@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -138,7 +137,7 @@ const formSchema = z.object({
                   </SelectTrigger>
                   <SelectContent className="text-16 border-none bg-black-1 font-bold text-white-1 focus:ring-offset-orange-1">
                     {voiceCategories.map((category) => (
-                      <SelectItem value={category} className="capitalize focus:bg-orange-1">{category}</SelectItem>
+                      <SelectItem key={category} value={category} className="capitalize focus:bg-orange-1">{category}</SelectItem>
                     ))}
                   </SelectContent>
                   {voiceType && (
