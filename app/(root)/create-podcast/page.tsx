@@ -54,7 +54,7 @@ const formSchema = z.object({
       const [audioDuration, setAudioDuration] = useState(0)
       const [voicePrompt, setVoicePrompt] = useState('')
 
-      const voiceCategories = ['alloy', 'shimmer', 'nova', 'echo', 'fable', 'onyx']
+      const voiceCategories = ['af_heart', 'af_bella', 'af_nicole', 'am_adam', 'am_michael', 'bm_george']
       const router = useRouter()
       // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -120,7 +120,7 @@ const formSchema = z.object({
                 name="podcastTitle"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2.5">
-                    <FormLabel className="text-16 font-bold text-white-1">Username</FormLabel>
+                    <FormLabel className="text-16 font-bold text-white-1">Podcast title</FormLabel>
                     <FormControl>
                       <Input className="input-class focus-visible:ring-offset-orange-1" placeholder="Pro Podcast" {...field} />
                     </FormControl>
@@ -140,13 +140,6 @@ const formSchema = z.object({
                       <SelectItem key={category} value={category} className="capitalize focus:bg-orange-1">{category}</SelectItem>
                     ))}
                   </SelectContent>
-                  {voiceType && (
-                    <audio
-                      src={`/${voiceType}.mp3`}
-                      autoPlay
-                      className="hidden"
-                    />
-                  )}
                 </Select>
 
               </div>

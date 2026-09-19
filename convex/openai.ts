@@ -1,45 +1,71 @@
 import { action } from "./_generated/server";
-import { v } from "convex/values";
-import OpenAI from 'openai'
-import { SpeechCreateParams } from "openai/resources/audio/speech.mjs";
+import { ConvexError, v } from "convex/values";
+import OpenAI from "openai";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-})
+const huggingFace = new OpenAI({
+  apiKey: process.env.HF_TOKEN,
+  baseURL: "https://router.huggingface.co/v1",
+});
 
-export const generateAudioAction = action({
-  args: { input: v.string(), voice: v.string() },
-  handler: async (_, {input, voice}) => {
-    // do something with `args.a` and `args.b`
-    const mp3 = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: voice as SpeechCreateParams['voice'],
-        input
-      });
-      const buffer = await mp3.arrayBuffer();
-      return buffer
+const requireAuthenticatedUser = async (ctx: { auth: { getUserIdentity: () => Promise<unknown> } }) => {
+  if (!(await ctx.auth.getUserIdentity())) {
+    throw new ConvexError("User not authenticated");
+  }
+};
+
+export const generateScriptAction = action({
+  args: { topic: v.string() },
+  handler: async (ctx, { topic }) => {
+    await requireAuthenticatedUser(ctx);
+
+    if (!topic.trim()) throw new ConvexError("A podcast topic is required");
+
+    const completion = await huggingFace.chat.completions.create({
+      model: "openai/gpt-oss-120b:groq",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You write engaging, accurate podcast narration. Return only a polished script ready for text-to-speech: no title, stage directions, markdown, or notes. Use short, natural paragraphs.",
+        },
+        { role: "user", content: `Write a podcast script about: ${topic}` },
+      ],
+      temperature: 0.7,
+      max_tokens: 1200,
+    });
+
+    const script = completion.choices[0]?.message.content;
+    if (!script) throw new ConvexError("The script generator returned no content");
+    return script;
   },
 });
 
-export const generateThumbnailAction = action({
-  args: {prompt: v.string()},
-  handler: async (_, {prompt}) => {
-    const response = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt,
-      size: '1024x1024',
-      quality: 'standard',
-      n: 1
-    })
+export const generateAudioAction = action({
+  args: { input: v.string(), voice: v.string() },
+  handler: async (ctx, { input, voice }) => {
+    await requireAuthenticatedUser(ctx);
 
-    const url = response.data[0].url
+    const response = await fetch(
+      "https://router.huggingface.co/deepinfra/v1/openai/audio/speech",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input,
+          model: "hexgrad/Kokoro-82M",
+          voice,
+          response_format: "mp3",
+        }),
+      }
+    );
 
-    if(!url){
-      throw new Error('Error generating thumbnail')
+    if (!response.ok) {
+      throw new ConvexError(`Kokoro speech generation failed: ${await response.text()}`);
     }
 
-    const imageResponse = await fetch(url)
-    const buffer = await imageResponse.arrayBuffer()
-    return buffer
-  }
-})
+    return await response.arrayBuffer();
+  },
+});

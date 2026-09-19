@@ -22,7 +22,7 @@ const EmptyState = ({title, search, buttonLink, buttonText}: EmptyStateProps) =>
                     <Button className='bg-orange-1'>
                         <Link href={buttonLink!} className='gap-1'>
                             <Image
-                                src="icons/discover.svg"
+                                src="/icons/discover.svg"
                                 width={20}
                                 height={20}
                                 alt='discover'

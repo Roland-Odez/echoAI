@@ -1,28 +1,21 @@
 import React, { useRef, useState } from 'react'
-import { Button } from './ui/button'
-import { cn } from '@/lib/utils'
-import { Label } from './ui/label'
-import { Textarea } from './ui/textarea'
 import { GenerateThumbnailProps } from '@/types'
 import { Loader } from 'lucide-react'
 import { Input } from './ui/input'
 import Image from 'next/image'
 import { useToast } from './ui/use-toast'
-import { useAction, useMutation } from 'convex/react'
+import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useUploadFiles } from '@xixixao/uploadstuff/react'
-import { v4 as uuidv4 } from 'uuid'
 
-const GenerateThumbnail = ({setImage, setImageStorageId, image, imagePrompt, setImagePrompt}: GenerateThumbnailProps) => {
+const GenerateThumbnail = ({setImage, setImageStorageId, image}: GenerateThumbnailProps) => {
 
-  const [isAiThumbnail, setIsAiThumbnail] = useState<boolean>(false)
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false)
 
   const imageRef = useRef<HTMLInputElement>(null)
   const generateUploadUrl = useMutation(api.files.generateUploadUrl)
   const { startUpload } = useUploadFiles(generateUploadUrl)
   const getImageUrl = useMutation(api.podcast.getUrl)
-  const handleGenerateThumbnail = useAction(api.openai.generateThumbnailAction)
   const { toast } = useToast()
 
   const handleImage = async (blob: Blob, fileName: string) => {
@@ -43,24 +36,6 @@ const GenerateThumbnail = ({setImage, setImageStorageId, image, imagePrompt, set
       toast({
         title: "thumbnail generated successfully"
       })
-    } catch (error) {
-      console.log(error)
-      toast({
-        title: "Error generating thumbnail",
-        variant: 'destructive'
-      })
-    }
-  }
-
-  const generateImage = async () => {
-    try {
-
-      const response = await handleGenerateThumbnail({
-        prompt: imagePrompt
-      })
-      const blob = new Blob([response], {type: 'image/png'})
-      handleImage(blob, `thumbnail-${uuidv4}.png`)
-      
     } catch (error) {
       console.log(error)
       toast({
@@ -91,52 +66,9 @@ const GenerateThumbnail = ({setImage, setImageStorageId, image, imagePrompt, set
 
   return (
     <>
-      <div className='generate_thumbnail'>
-        <Button
-          type="button"
-          variant='plain'
-          onClick={() => setIsAiThumbnail(true)}
-          className={cn('', {'bg-black-6': isAiThumbnail})}
-        >
-          Use AI to generate thumbnail
-        </Button>
-        <Button
-          type="button"
-          variant='plain'
-          onClick={() => setIsAiThumbnail(false)}
-          className={cn('', {'bg-black-6': !isAiThumbnail})}
-        >
-          Upload custom image
-        </Button>
-      </div>
-      {isAiThumbnail ? (
-        <div className='flex flex-col gap-5 mt-5'>
-          <div className='flex flex-col gap-2.5'>
-            <Label className='text-16 font-bold text-white-1'>AI Prompt to generate thumbnail</Label>
-            <Textarea 
-                className='input-class font-light focus-visible:ring-offset-orange-1'
-                placeholder='Provide text to generate thumbnail'
-                rows={5}
-                value={imagePrompt}
-                onChange={(e) => setImagePrompt(e.target.value)}
-            />
-        </div>
-        <div className='w-full max-w-[200px]'>
-            <Button type="submit" className="text-16 py-4 font-bold text-white-1 bg-orange-1" onClick={generateImage}>
-                {isImageLoading ? (
-                    <>
-                    Generating
-                    <Loader size={20} className='animate-spin ml-2' />
-                    </>
-                ) : (
-                    <>
-                    Generate
-                    </>
-                )}
-            </Button>
-        </div>
-      </div>
-      ): (
+      <div className='mt-[30px] flex flex-col gap-2.5'>
+        <h2 className='text-16 font-bold text-white-1'>Podcast cover image</h2>
+        <p className='text-14 text-white-3'>Upload a square cover image for your podcast.</p>
         <div className='image_div' onClick={() => imageRef.current?.click()}
           onChange={uploadImage}
         >
@@ -158,7 +90,7 @@ const GenerateThumbnail = ({setImage, setImageStorageId, image, imagePrompt, set
             <p className='text-12 font-normal text-gray-1'>SVG, PNG, JPG, or GIF (MAX. 1080x1080px)</p>
           </div>
         </div>
-      )}
+      </div>
       {image && (
         <div className='flex-center w-full'>
           <Image

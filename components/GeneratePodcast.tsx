@@ -26,9 +26,14 @@ const useGeneratePodcast = ({
 
         setAudio('')
 
+        if(!voiceType){
+            toast({ title: "Please select a Kokoro voice", variant: "destructive" })
+            return setIsGenerating(false)
+        }
+
         if(!voicePrompt){
             toast({
-                title: "Please provide a voiceType to generate a podcast"
+                title: "Please generate or write a narration script"
             })
             return setIsGenerating(false)
         }
@@ -72,21 +77,58 @@ const useGeneratePodcast = ({
 const GeneratePodcast = (props: GeneratePodcastProps) => {
 
     const {isGenerating, generatePodcast} = useGeneratePodcast(props)
+    const [topic, setTopic] = useState('')
+    const [isGeneratingScript, setIsGeneratingScript] = useState(false)
+    const generateScript = useAction(api.openai.generateScriptAction)
+    const { toast } = useToast()
+
+    const handleGenerateScript = async () => {
+        if (!topic.trim()) {
+            toast({ title: 'Please provide a podcast topic', variant: 'destructive' })
+            return
+        }
+
+        setIsGeneratingScript(true)
+        try {
+            props.setVoicePrompt(await generateScript({ topic }))
+            toast({ title: 'Script generated. You can edit it before creating audio.' })
+        } catch (error) {
+            console.log('Error generating script', error)
+            toast({ title: 'Error generating script', variant: 'destructive' })
+        } finally {
+            setIsGeneratingScript(false)
+        }
+    }
 
   return (
     <div>
         <div className='flex flex-col gap-2.5'>
-            <Label className='text-16 font-bold text-white-1'>AI Prompt to generate podcast</Label>
+            <Label className='text-16 font-bold text-white-1'>Podcast topic and instructions</Label>
+            <Textarea
+                className='input-class font-light focus-visible:ring-offset-orange-1'
+                placeholder='Example: Explain practical ways small businesses can use AI, in a warm and optimistic tone.'
+                rows={4}
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+            />
+        </div>
+        <div className='mt-5 w-full max-w-[200px]'>
+            <Button type="button" className="text-16 py-4 font-bold text-white-1 bg-orange-1" onClick={handleGenerateScript} disabled={isGeneratingScript}>
+                {isGeneratingScript ? <><Loader size={20} className='animate-spin mr-2' /> Writing script</> : 'Generate script'}
+            </Button>
+        </div>
+        <div className='mt-8 flex flex-col gap-2.5'>
+            <Label className='text-16 font-bold text-white-1'>Narration script</Label>
             <Textarea 
                 className='input-class font-light focus-visible:ring-offset-orange-1'
-                placeholder='Provide text to generate audio'
-                rows={5}
+                placeholder='Generate a script above, or write and edit the narration yourself.'
+                rows={8}
                 value={props.voicePrompt}
                 onChange={(e) => props.setVoicePrompt(e.target.value)}
             />
         </div>
         <div className='mt-5 w-full max-w-[200px]'>
-            <Button type="submit" className="text-16 py-4 font-bold text-white-1 bg-orange-1" onClick={generatePodcast}>
+            <Button type="button" className="text-16 py-4 font-bold text-white-1 bg-orange-1" onClick={generatePodcast} disabled={isGenerating}>
                 {isGenerating ? (
                     <>
                     Generating
